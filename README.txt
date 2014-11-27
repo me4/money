@@ -1,7 +1,9 @@
 Minetest 0.4 mod: money
 =======================
 
-This can be found in:
+This mod has been edited by TenPlus1
+
+The original can be found in:
   https://github.com/kotolegokot/minetest-mod-money
 
 License of source code
