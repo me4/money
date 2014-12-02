@@ -12,11 +12,18 @@ POSTFIX = " coin"
 
 -- Loading accounts
 
-local accounts = {}
-local input = io.open(minetest.get_worldpath() .. "/accounts", "r")
+local accounts_money = {}
+local accounts_frozen = {}
+local input = io.open(minetest.get_worldpath() .. "/accounts_money", "r")
 
 if input then
-	accounts = minetest.deserialize(input:read("*l"))
+	accounts_money = minetest.deserialize(input:read("*l"))
+	io.close(input)
+end
+
+input = io.open(minetest.get_worldpath() .. "/accounts_frozen", "r")
+if input then
+	accounts_frozen = minetest.deserialize(input:read("*l"))
 	io.close(input)
 end
 
@@ -24,37 +31,43 @@ end
 
 money = {}
 
-function money.save_accounts()
-	local output = io.open(minetest.get_worldpath() .. "/accounts", "w")
-	output:write(minetest.serialize(accounts))
+function money.save_money()
+	local output = io.open(minetest.get_worldpath() .. "/accounts_money", "w")
+	output:write(minetest.serialize(accounts_money))
+	io.close(output)
+end
+
+function money.save_frozen()
+	local output = io.open(minetest.get_worldpath() .. "/accounts_frozen", "w")
+	output:write(minetest.serialize(accounts_frozen))
 	io.close(output)
 end
 
 function money.set_money(name, amount)
-	accounts[name].money = amount
-	money.save_accounts()
+	accounts_money[name] = amount
+	money.save_money()
 end
 
 function money.get_money(name)
-	return accounts[name].money
+	return accounts_money[name]
 end
 
 function money.freeze(name)
-	accounts[name].frozen = true
-	money.save_accounts()
+	accounts_frozen[name] = true
+	money.save_frozen()
 end
 
 function money.unfreeze(name)
-	accounts[name].frozen = false
-	money.save_accounts()
+	accounts_frozen[name] = false
+	money.save_frozen()
 end
 
 function money.is_frozen(name)
-	return accounts[name].frozen or false
+	return accounts_frozen[name] or false
 end
 
 function money.exist(name)
-	return accounts[name] ~= nil
+	return accounts_money[name] ~= nil
 end
 
 -- Creates player's account, if the player doesn't have it.
@@ -62,7 +75,7 @@ end
 minetest.register_on_joinplayer(function(player)
 	local name = player:get_player_name()
 	if not money.exist(name) then
-		accounts[name] = {money = INITIAL_MONEY}
+		accounts_money[name] = INITIAL_MONEY
 	end
 end)
 
